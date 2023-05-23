@@ -10,12 +10,14 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
 
 import { Dashboard } from './pages/Dashboard';
 import { Settings } from './pages/Settings';
 import { Employees } from './pages/Employees';
 import { Reports } from './pages/Reports';
+import { Records } from './pages/Records';
 
 
 
@@ -27,7 +29,6 @@ const theme = createTheme({
 
 const drawerWidth=240;
 const Main = styled(Box,{ shouldForwardProp: (prop) => prop !== 'drawerOpen' })(({ theme, drawerOpen }) => ({
-  
   marginLeft: drawerOpen? `${drawerWidth}px` : '0px',
   transition: theme.transitions.create(['margin', 'width'], {
     easing: theme.transitions.easing.easeOut,
@@ -41,6 +42,8 @@ function App() {
 
 
   let [drawerOpen, setDrawerOpen] = useState(false);
+  let [employees,setEmployees] = useState(localStorage.getItem("employees")?JSON.parse(localStorage.getItem("employees")):[]);
+
   let toggleDrawerOpen = () =>{
     setDrawerOpen(!drawerOpen);
   }
@@ -79,13 +82,7 @@ function App() {
             display:"flex",
             flexDirection:"column",
             justifyContent:"space-between"
-
-            
-            
-
-
-
-          }}>
+            }}>
 
             <Box >
               <List>
@@ -111,11 +108,20 @@ function App() {
                 </ListItem>
 
                 <ListItem>
-                  <ListItemButton component={Link} to="/reports">
-                    <ListItemIcon><BarChartIcon/></ListItemIcon>
-                    <ListItemText>Reports</ListItemText>
+                  <ListItemButton component={Link} to="/records">
+                    <ListItemIcon><ContentPasteIcon/></ListItemIcon>
+                    <ListItemText>Records</ListItemText>
                   </ListItemButton>
                 </ListItem>
+
+                <ListItem>
+                  <ListItemButton component={Link} to="/reports">
+                    <ListItemIcon><BarChartIcon/></ListItemIcon>
+                    <ListItemText>Report</ListItemText>
+                  </ListItemButton>
+                </ListItem>
+
+               
 
               </List>
             </Box>
@@ -129,7 +135,6 @@ function App() {
                     <ListItemText>Settings</ListItemText>
                   </ListItemButton>
                 </ListItem>
-
               </List>
 
             </Paper>
@@ -142,9 +147,15 @@ function App() {
           <Box>
             <Routes>
               <Route path="/" element={<Dashboard/>} />
-              <Route path="/employees" element={<Employees/>} />
-              <Route path="/reports" element={<Reports/>} />
+              <Route path="/employees" element={<Employees
+                employees={employees}
+                setEmployees={setEmployees}
+                />} />
+              <Route path="/reports" element={<Reports
+                employees={employees}
+              />} />
               <Route path="/settings" element={<Settings/>} />
+              <Route path="/records" element={<Records/>} />
             </Routes>
           </Box>
         </Main>

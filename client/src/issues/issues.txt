@@ -1,1 +1,2 @@
-1. api call on toggleDrawer
+1. on delete only one delete reflected in UI eventhough there's multiple delete
+2. the sort on datagrid is not working on time and othe custom values ( wherelexographic order does not apply)

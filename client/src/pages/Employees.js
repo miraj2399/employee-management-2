@@ -2,10 +2,10 @@ import { Button } from '@mui/material';
 import {EmployeeDataGrid} from '../components/EmployeeDataGrid';
 import { useState,useEffect,useRef } from 'react';
 import { TextField,Box } from "@mui/material";
-import {BASE_URL} from '../functions/Settings';
 
-export function Employees() {
-    let [employees, setEmployees] = useState([]);
+
+export function Employees({employees,setEmployees}) {
+    
     
     let [newEmployee,setNewEmployee] = useState([{
         "empId":"",
@@ -56,7 +56,7 @@ export function Employees() {
 
     async function handleSubmit(){
         
-        const url = `${BASE_URL}/employees`;
+        const url = `${process.env.REACT_APP_API_URL}/employees`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -67,6 +67,7 @@ export function Employees() {
         });
         if(response.ok){
             const responseData = await response.json();
+        
             setEmployees([...employees, responseData[0]]);
             setNewEmployee({
                 "empId":"",
@@ -86,9 +87,12 @@ export function Employees() {
 
     useEffect(() => {
         async function fetchEmployees() {
-            fetch(`${BASE_URL}/employees`)
+            fetch(`${process.env.REACT_APP_API_URL}/employees`)
                 .then(response => response.json())
-                .then(data => setEmployees(data));
+                .then(data => {
+                    setEmployees(data);
+                    localStorage.setItem('employees', JSON.stringify(data));
+                });
         }
         fetchEmployees();
         

@@ -10,6 +10,8 @@ import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
 import {  Grid } from '@mui/material';
+import moment from 'moment';
+
 
 
 const useFakeMutation = () => {
@@ -44,28 +46,38 @@ const useFakeMutation = () => {
   );
 };
 
+/*
+formattedRecord._id = record._id
+            formattedRecord.id = record.id
+            formattedRecord.empId = record.employee.empId
+            formattedRecord.clockIn = record.clockIn
+            formattedRecord.clockOut = record.clockOut
+            formattedRecord.clockTime = `${Math.floor(cTime / 60)}:${cTime % 60}`
+            // two decimal places
+            formattedRecord.wageAccured = (record.employee.salary * cTime / 60).toFixed(2)
+*/
 function computeMutation(newRow, oldRow) {
     if (newRow.empId !== oldRow.empId) {
         return `empId from ${oldRow.empId} to ${newRow.empId}`;
     }
-    if (newRow.firstName !== oldRow.firstName) {
-        return `firstName from ${oldRow.firstName} to ${newRow.firstName}`;
+    if (newRow.clockIn !== oldRow.clockIn) {
+        return `clockIn from ${oldRow.clockIn} to ${newRow.clockIn}`;
     }
-    if (newRow.lastName !== oldRow.lastName) {
-        return `lastName from ${oldRow.lastName} to ${newRow.lastName}`;
+    if (newRow.clockOut !== oldRow.clockOut) {
+        return `clockOut from ${oldRow.clockOut} to ${newRow.clockOut}`;
     }
-    if (newRow.salary !== oldRow.salary) {
-        return `salary from ${oldRow.salary} to ${newRow.salary}`;
+    if (newRow.clockTime !== oldRow.clockTime) {
+        return `clockTime from ${oldRow.clockTime} to ${newRow.clockTime}`;
     }
-    if (newRow.contact !== oldRow.contact) {
-        return `contact from ${oldRow.contact} to ${newRow.contact}`;
+    if (newRow.wageAccured !== oldRow.wageAccured) {
+        return `wageAccured from ${oldRow.wageAccured} to ${newRow.wageAccured}`;
     }
     
 
   return null;
 }
 
-export  function EmployeeDataGrid({employees: rows,setEmployees}) {
+export  function RecordDataGrid({records:rows,setRecords}) {
     
   const mutateRow = useFakeMutation();
   const yesButtonRef = React.useRef(null);
@@ -155,14 +167,15 @@ export  function EmployeeDataGrid({employees: rows,setEmployees}) {
   const handleSelection = (newSelectionModel) => {
     setSelectionModel(newSelectionModel);
   };
-  const navigate = useNavigate();
+ 
 
   return (
      <Grid  container spacing={2} marginTop={1}  >
     <Grid item xs={12} minHeight={"50px"} >
-    {selectionModel.length>0 && <Button size='small' variant="contained" color="primary" onClick={()=>{
+    {selectionModel.length>0 && 
+    <Button size='small' variant="contained" color="primary" onClick={() => {
       const selectedRecords = rows.filter((row) => selectionModel.includes(row.id));
-      fetch(`${process.env.REACT_APP_API_URL}/employees`, {
+      fetch(`${process.env.REACT_APP_API_URL}/clockrecords`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -171,19 +184,21 @@ export  function EmployeeDataGrid({employees: rows,setEmployees}) {
         body: JSON.stringify(selectedRecords)
       }).then((response) => {
         if(response.ok){
-          setEmployees(rows.filter((row) => !selectionModel.includes(row.id)));
+          setRecords(rows.filter((row) => !selectionModel.includes(row.id)));
           setSelectionModel([]);
-          setSnackbar({ children: 'Employees successfully deleted', severity: 'success' });
+          setSnackbar({ children: 'Records successfully deleted', severity: 'success' });
         }
       }
       )
-    }
-    }>Delete</Button>}
+
+
+    }}>Delete</Button>}
     </Grid>
 
-    <Grid item xs={12} height={"70vh"}>
+    <Grid item xs={12} maxHeight={"80vh"}>
       {renderConfirmDialog()}
-      <DataGrid  rows={rows} columns={columns} processRowUpdate={processRowUpdate} checkboxSelection onRowSelectionModelChange={handleSelection}/>
+      <DataGrid  rows={rows} columns={columns} processRowUpdate={processRowUpdate} checkboxSelection onRowSelectionModelChange={handleSelection}
+      pageSizeOptions={[5, 10, 25,50,100]} />
       {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
@@ -194,33 +209,19 @@ export  function EmployeeDataGrid({employees: rows,setEmployees}) {
   );
 }
 
-/*
-const columns = [
-  { field: 'name', headerName: 'Name', width: 180, editable: true },
-  { field: 'age', headerName: 'Age', type: 'number', editable: true },
-  {
-    field: 'dateCreated',
-    headerName: 'Date Created',
-    type: 'date',
-    width: 180,
-  },
-  {
-    field: 'lastLogin',
-    headerName: 'Last Login',
-    type: 'dateTime',
-    width: 220,
-    
-   
-  },
-];
-*/
 
 
 
 const columns = [
-    {field: 'empId', headerName: 'Employee ID', width: 180, editable: true},
-    {field: 'firstName', headerName: 'First Name', width: 180, editable: true},
-    {field: 'lastName', headerName: 'Last Name', width: 180, editable: true},
-    {field: 'salary', headerName: 'Salary', width: 180, editable: true},
-    {field: 'contact', headerName: 'Contact', width: 180, editable: true}
+    {field: 'empId', headerName: 'Employee ID', width: 180, editable: false},
+    {field: 'clockIn', type: 'date',
+    valueFormatter: params => 
+    moment(params?.value).format("DD/MM/YYYY HH:mm"),
+    headerName: 'Clock In', width: 180, editable: false},
+    {field: 'clockOut',type: 'date',
+    valueFormatter: params => 
+    moment(params?.value).format("DD/MM/YYYY HH:mm"),
+     headerName: 'Clock Out', width: 180, editable: false},
+    {field: 'clockTime', headerName: 'Time worked', width: 180, editable: false},
+    {field: 'wageAccured', headerName: 'Wage Accured', width: 180, editable: false}
 ];
